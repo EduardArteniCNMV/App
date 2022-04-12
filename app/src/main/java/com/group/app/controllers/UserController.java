@@ -113,5 +113,37 @@ public class UserController {
 
     }
 
+    @RequestMapping(
+            value = "/users/login",
+            params = {"id", "password"},
+            method = GET)
+    @ResponseBody
+    public String login(@RequestParam("id") int id, @RequestParam("password") String password) throws SQLException {
+
+        User foundUser = new User();
+        String username = "";
+
+        String query = "SELECT id, username, password FROM public.\"User\" where \"id\"=? and \"password\"=?;";
+        PreparedStatement ps = DataBaseConnector.connection.prepareStatement(query);
+        ps.setInt(1, id);
+        ps.setString(2, password);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            username = rs.getString("username");
+        }
+        if (!username.equals("")) {
+            foundUser.id = id;
+            foundUser.username = username;
+            foundUser.password = password;
+        }else{
+            foundUser.errorCode = 1;
+        }
+        String jsonRep = new Gson().toJson(foundUser);
+
+        return jsonRep;
+
+    }
+
 
 }
